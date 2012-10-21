@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <title>xkcd style charts using svg</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <style>
+    body {
+      background-color: #333;
+    }
+    #chart {
+      position: relative;
+      float: left;
+      width: 800px;
+      height: 600px;
+      padding: 10px;
+      background-color: white;
+      border-radius: 6px;
+    }
+    </style>
+
+  </head>
+  <body>
+    <div id='chart'></div>
+    <button type='button' onclick='animate()'>Animate</button>
+
+    <script src='javascripts/svg.js'></script>
+    <script src='javascripts/xkcd.js'></script>
+    <script>
+    var xmin = -1,
+        xmax = 7,
+        N = 100,
+        dx = (xmax - xmin) / N
+
+    function f1(x) {
+      return Math.exp(-0.5 * (x - 1) * (x - 1)) * Math.sin(x + 0.2) - 0.1
+    }
+
+    function f2(x) {
+      return 0.5 * Math.cos(x - 0.5) - 0.2;
+    }  
+
+    var data1 = [], data2 = []
+    for(var d = xmin; d < xmax; d += dx) {
+      data1.push({ x: d, y: f1(d) })
+      data2.push({ x: d, y: f2(d) })
+    }
+
+    var chart = new Xkcd.LineChart('chart', { magnitude: 0.005 })
+    chart.addXYScatter('geeks', data1, { 'stroke': 'steelblue', 'stroke-width': 3 })
+    chart.addXYScatter('toys', data2, { 'stroke': 'red', 'stroke-width': 3 })
+    chart.draw()
+
+    var interval
+    function animate() {
+      if(interval) {
+        clearInterval(interval)
+        interval = null
+      } else {
+        interval = setInterval(function() {
+          xmin += dx
+          xmax += dx
+          
+          data1.shift()
+          data1.push({ x: xmax, y: f1(xmax) })
+          data2.shift()
+          data2.push({ x: xmax, y: f2(xmax) })
+
+          chart.clear()
+          chart.addXYScatter('geeks', data1, { 'stroke': 'steelblue', 'stroke-width': 3 })
+          chart.addXYScatter('toys', data2, { 'stroke': 'red', 'stroke-width': 3 })
+          chart.setYAxis(xmin + 1)
+          chart.draw()
+        }, 100)
+      }
+    }
+    </script>
+  </body>
+</html
